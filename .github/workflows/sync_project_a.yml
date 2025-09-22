@@ -1,0 +1,48 @@
+name: Sync README.md from Project A
+
+# This workflow can be triggered manually or on a schedule
+on:
+  workflow_dispatch:
+  schedule:
+    # Runs at 5:00 AM UTC every day.
+    # Adjust as needed. This is an alternative to a push trigger.
+    - cron: '0 5 * * *'
+
+jobs:
+  sync-readme:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout project-b
+        uses: actions/checkout@v4
+        with:
+          # Use a token to allow the workflow to push commits
+          token: ${{ secrets.PROJECT_A_TOKEN }}
+          
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+      - name: Get README.md from Project A
+        run: |
+          # Fetch the latest changes from project-a using the PAT for authentication
+          # and get the file at the same time.
+          # We use a URL with the token directly.
+          git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 https://oauth2:${{ secrets.PROJECT_A_TOKEN }}@github.com/shivam-work-name/project-a.git main
+          
+      - name: Checkout the README.md file
+        run: git checkout FETCH_HEAD -- README.md
+
+      - name: Check for changes and commit
+        id: commit-file
+        run: |
+          # Check if the file has changed before committing
+          if [[ -n $(git status --porcelain README.md) ]]; then
+            git add README.md
+            git commit -m "feat(sync): Update README.md from project-a"
+            git push
+            echo "::notice::README.md has been successfully updated and pushed."
+          else
+            echo "::notice::No changes detected in README.md. Nothing to commit."
+          fi
