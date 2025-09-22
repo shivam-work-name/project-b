@@ -24,7 +24,7 @@ jobs:
       - name: Get README.md from Project A
         run: |
           # Use your PAT to fetch the file from project-a
-          git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 https://oauth2:${{ secrets.PROJECT_A_TOKEN }}@github.com/your-username/project-a.git main
+          git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 https://oauth2:${{ secrets.PROJECT_A_TOKEN }}@github.com/shivam-work-name/project-a.git main
           
       - name: Checkout the README.md file
         run: git checkout FETCH_HEAD -- README.md
