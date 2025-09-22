@@ -1,11 +1,8 @@
 name: Sync README.md from Project A
 
-# This workflow can be triggered manually or on a schedule
 on:
   workflow_dispatch:
   schedule:
-    # Runs at 5:00 AM UTC every day.
-    # Adjust as needed. This is an alternative to a push trigger.
     - cron: '0 5 * * *'
 
 jobs:
@@ -14,10 +11,10 @@ jobs:
     
     steps:
       - name: Checkout project-b
+        # Use the default GITHUB_TOKEN for actions within this repo
         uses: actions/checkout@v4
         with:
-          # Use a token to allow the workflow to push commits
-          token: ${{ secrets.PROJECT_A_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Configure Git
         run: |
@@ -26,10 +23,8 @@ jobs:
           
       - name: Get README.md from Project A
         run: |
-          # Fetch the latest changes from project-a using the PAT for authentication
-          # and get the file at the same time.
-          # We use a URL with the token directly.
-          git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 https://oauth2:${{ secrets.PROJECT_A_TOKEN }}@github.com/shivam-work-name/project-a.git main
+          # Use your PAT to fetch the file from project-a
+          git fetch --no-tags --prune --progress --no-recurse-submodules --depth=1 https://oauth2:${{ secrets.PROJECT_A_TOKEN }}@github.com/your-username/project-a.git main
           
       - name: Checkout the README.md file
         run: git checkout FETCH_HEAD -- README.md
@@ -37,10 +32,10 @@ jobs:
       - name: Check for changes and commit
         id: commit-file
         run: |
-          # Check if the file has changed before committing
           if [[ -n $(git status --porcelain README.md) ]]; then
             git add README.md
             git commit -m "feat(sync): Update README.md from project-a"
+            # The push now works because we're using the GITHUB_TOKEN
             git push
             echo "::notice::README.md has been successfully updated and pushed."
           else
